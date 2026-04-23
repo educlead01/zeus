@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0d14" />
+<title>Relatório Facebook Ads</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<style>
+  /* ---------- RESET ---------- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0d14;
+    color: #e8eaf0;
+    min-height: 100vh;
+    line-height: 1.4;
+  }
+  img { display: block; max-width: 100%; }
+  input { font-family: inherit; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0d14; }
+  ::-webkit-scrollbar-thumb { background: #2a3050; border-radius: 3px; }
+
+  /* ---------- LAYOUT (mobile-first) ---------- */
+  .app {
+    min-height: 100vh;
+    padding: 16px 14px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ---------- HEADER ---------- */
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .brand { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .brand-row { display: flex; align-items: center; gap: 12px; }
+  .brand-logo {
+    width: 44px; height: 44px; border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid #2a3050;
+    background: #161c2e;
+    flex-shrink: 0;
+  }
+  .brand-title {
+    font-size: 22px; font-weight: 800;
+    color: #f0f2f8; letter-spacing: 2px;
+  }
+  .brand-subtitle {
+    font-size: 13px; color: #5a6480; padding-left: 2px;
+  }
+  .period-badge {
+    align-self: stretch;
+    text-align: center;
+    background: #161c2e;
+    border: 1px solid #2a3050;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #a0aabf;
+    font-weight: 500;
+  }
+
+  /* ---------- KPI GRID (1 col on mobile) ---------- */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .kpi-card {
+    background: linear-gradient(135deg, #111520 0%, #161c2e 100%);
+    border: 1px solid #1e2540;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .kpi-card:nth-child(1) { animation-delay: 0ms; }
+  .kpi-card:nth-child(2) { animation-delay: 80ms; }
+  .kpi-card:nth-child(3) { animation-delay: 160ms; }
+  .kpi-card:nth-child(4) { animation-delay: 240ms; }
+  .kpi-card:nth-child(5) { animation-delay: 320ms; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .kpi-card .glow {
+    position: absolute; top: 0; right: 0;
+    width: 120px; height: 120px;
+    opacity: 0.06; border-radius: 50%;
+    transform: translate(30%, -30%);
+    pointer-events: none;
+  }
+  .kpi-top {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .kpi-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .kpi-change {
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .kpi-change.up { color: #30d98a; background: #30d98a18; }
+  .kpi-change.down { color: #f06060; background: #f0606018; }
+  .kpi-label {
+    font-size: 13px; color: #7a86a6; font-weight: 500; margin-bottom: 4px;
+  }
+  .kpi-value {
+    font-size: 26px; font-weight: 700; color: #f0f2f8;
+    letter-spacing: -1px; line-height: 1;
+  }
+
+  /* ---------- CHARTS (stacked on mobile) ---------- */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .chart-box {
+    background: linear-gradient(135deg, #111520 0%, #161c2e 100%);
+    border: 1px solid #1e2540;
+    border-radius: 16px;
+    padding: 18px 16px;
+  }
+  .chart-title {
+    font-size: 14px; font-weight: 600; color: #a0aabf; margin-bottom: 16px;
+  }
+  .chart-wrap { height: 240px; position: relative; }
+
+  /* ---------- FOOTER ---------- */
+  .footer {
+    margin-top: 24px; text-align: center;
+    font-size: 12px; color: #3a4060;
+  }
+
+  /* =========================================================
+     BREAKPOINTS — progressively enhance for larger screens
+     ========================================================= */
+
+  /* Tablet portrait+ */
+  @media (min-width: 640px) {
+    .app { padding: 24px 20px; }
+    .header {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .brand-logo { width: 48px; height: 48px; }
+    .brand-title { font-size: 26px; }
+    .period-badge {
+      align-self: auto;
+      padding: 10px 18px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .kpi-card { padding: 22px 22px; }
+    .kpi-value { font-size: 28px; }
+    .chart-box { padding: 22px 22px; }
+  }
+
+  /* Small desktops / landscape tablet */
+  @media (min-width: 1024px) {
+    .app { padding: 32px 40px; }
+    .kpi-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card { padding: 24px 26px; }
+    .kpi-value { font-size: 32px; }
+    .charts-row { grid-template-columns: 2fr 1fr; gap: 16px; }
+    .chart-box { padding: 24px 26px; }
+    .chart-wrap { height: 260px; }
+  }
+
+  /* Wide screens — 5 KPI cards in 1 row */
+  @media (min-width: 1280px) {
+    .kpi-grid { grid-template-columns: repeat(5, 1fr); }
+  }
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <!-- HEADER -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-row">
+        <img class="brand-logo" id="brandLogo" alt="Logo"
+             src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%23161c2e'/><text x='50%25' y='55%25' font-family='DM Sans' font-size='22' font-weight='800' fill='%231877F2' text-anchor='middle' dominant-baseline='middle'>Z</text></svg>" />
+        <div class="brand-title" id="brandTitle">ZEUS</div>
+      </div>
+      <div class="brand-subtitle">Relatório de Facebook Ads</div>
+    </div>
+    <div class="period-badge" id="periodBadge">📅 Últimos 30 dias</div>
+  </header>
+
+  <!-- KPIs -->
+  <section class="kpi-grid" id="kpiGrid"></section>
+
+  <!-- CHARTS -->
+  <section class="charts-row">
+    <div class="chart-box">
+      <div class="chart-title">Desempenho ao longo do mês</div>
+      <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Seguidores por dia da semana</div>
+      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="footer"></footer>
+</div>
+
+<script>
+  // ---------- DATA (edit these to customize the report) ----------
+  const DATA = {
+    brandName: "Minha Marca",
+    period: "Últimos 30 dias",
+    accentColor: "#1877F2",
+    followers: 238,
+    profileVisits: 1829,
+    whatsappLeads: 139,
+    reach: 54323,
+    cpm: 18.4,
+    investment: 532.13,
+  };
+
+  // ---------- ICONS ----------
+  const ICONS = {
+    followers: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    visits: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    whatsapp: `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>`,
+    reach: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+    investment: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`,
+  };
+
+  // ---------- FORMATTERS ----------
+  const fmt = (n) => {
+    if (n >= 1e6) return (n/1e6).toFixed(1).replace('.', ',') + 'M';
+    if (n >= 1e3) return (n/1e3).toFixed(1).replace('.', ',') + 'K';
+    return n.toLocaleString('pt-BR');
+  };
+  const fmtR = (n) =>
+    'R$ ' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  // ---------- RENDER KPIs ----------
+  const kpis = [
+    { icon: 'followers',  label: 'Novos Seguidores',  value: DATA.followers,     fmt: 'num',      color: DATA.accentColor, change: 18 },
+    { icon: 'visits',     label: 'Visitas ao Perfil', value: DATA.profileVisits, fmt: 'num',      color: '#a855f7',        change: 12 },
+    { icon: 'whatsapp',   label: 'Leads no WhatsApp', value: DATA.whatsappLeads, fmt: 'num',      color: '#25D366',        change: 34 },
+    { icon: 'reach',      label: 'Alcance',           value: DATA.reach,         fmt: 'num',      color: '#f59e0b',        change: 8  },
+    { icon: 'investment', label: 'Investimento Total',value: DATA.investment,    fmt: 'currency', color: '#30d98a' },
+  ];
+
+  const grid = document.getElementById('kpiGrid');
+  grid.innerHTML = kpis.map(k => {
+    const val = k.fmt === 'currency' ? fmtR(k.value) : fmt(k.value);
+    const changeHtml = k.change !== undefined
+      ? `<div class="kpi-change ${k.change >= 0 ? 'up' : 'down'}">
+           ${k.change >= 0 ? '▲' : '▼'} ${Math.abs(k.change)}%
+         </div>`
+      : '';
+    return `
+      <article class="kpi-card">
+        <div class="glow" style="background:${k.color}"></div>
+        <div class="kpi-top">
+          <div class="kpi-icon" style="background:${k.color}18;color:${k.color}">${ICONS[k.icon]}</div>
+          ${changeHtml}
+        </div>
+        <div>
+          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-value">${val}</div>
+        </div>
+      </article>`;
+  }).join('');
+
+  // ---------- PERIOD / FOOTER ----------
+  document.getElementById('periodBadge').textContent = '📅 ' + DATA.period;
+  document.getElementById('footer').textContent =
+    'Gerado em ' + new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  // ---------- CHARTS ----------
+  const chartCommonOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: '#7a86a6', font: { family: 'DM Sans', size: 12 } } },
+      tooltip: {
+        backgroundColor: '#1a2035', borderColor: '#2a3050', borderWidth: 1,
+        titleColor: '#f0f2f8', bodyColor: '#a0aabf',
+      },
+    },
+  };
+
+  // Line chart
+  const lineCtx = document.getElementById('lineChart').getContext('2d');
+  const grad = lineCtx.createLinearGradient(0, 0, 0, 260);
+  grad.addColorStop(0, DATA.accentColor + '44');
+  grad.addColorStop(1, DATA.accentColor + '00');
+
+  new Chart(lineCtx, {
+    type: 'line',
+    data: {
+      labels: ['01 Mar', '05 Mar', '10 Mar', '15 Mar', '20 Mar', '25 Mar', '31 Mar'],
+      datasets: [
+        {
+          label: 'Alcance diário',
+          data: [12400, 18700, 22100, 31500, 28900, 35200, 41800],
+          borderColor: DATA.accentColor, backgroundColor: grad,
+          borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: DATA.accentColor,
+          tension: 0.4, fill: true, yAxisID: 'y',
+        },
+        {
+          label: 'Leads WhatsApp',
+          data: [18, 32, 44, 67, 58, 82, 97],
+          borderColor: '#30d98a', backgroundColor: 'transparent',
+          borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#30d98a',
+          tension: 0.4, fill: false, yAxisID: 'y2',
+        },
+      ],
+    },
+    options: {
+      ...chartCommonOpts,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { ticks: { color: '#5a6480', font: { family: 'DM Sans' } }, grid: { color: '#1a2035' } },
+        y: {
+          position: 'left',
+          ticks: { color: '#5a6480', font: { family: 'DM Sans' }, callback: (v) => fmt(v) },
+          grid: { color: '#1a2035' },
+        },
+        y2: {
+          position: 'right',
+          ticks: { color: '#30d98a', font: { family: 'DM Sans' } },
+          grid: { drawOnChartArea: false },
+        },
+      },
+    },
+  });
+
+  // Bar chart
+  new Chart(document.getElementById('barChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+      datasets: [{
+        label: 'Novos seguidores',
+        data: [18, 14, 9, 21, 16, 12, 19],
+        backgroundColor: DATA.accentColor + 'cc',
+        borderRadius: 8, borderSkipped: false,
+      }],
+    },
+    options: {
+      ...chartCommonOpts,
+      plugins: { ...chartCommonOpts.plugins, legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#5a6480', font: { family: 'DM Sans' } }, grid: { display: false } },
+        y: { ticks: { color: '#5a6480', font: { family: 'DM Sans' } }, grid: { color: '#1a2035' } },
+      },
+    },
+  });
+</script>
+
+</body>
+</html>
