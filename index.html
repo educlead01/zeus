@@ -197,6 +197,97 @@
   @media (min-width: 1280px) {
     .kpi-grid { grid-template-columns: repeat(5, 1fr); }
   }
+
+  /* ---------- ENTRANCE ---------- */
+  .header {
+    opacity: 0;
+    animation: fadeDown 0.55s ease 0.05s forwards;
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- BRAND TITLE SHIMMER ---------- */
+  .brand-title {
+    background: linear-gradient(90deg, #f0f2f8 20%, #5a9cf8 50%, #f0f2f8 80%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerText 5s linear infinite;
+  }
+  @keyframes shimmerText {
+    from { background-position: 200% center; }
+    to   { background-position: 0% center; }
+  }
+
+  /* ---------- KPI CARD HOVER ---------- */
+  .kpi-card { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+  .kpi-card:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+  }
+  /* shimmer sweep */
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.055) 50%, transparent 75%);
+    transform: translateX(-100%);
+    transition: transform 0.55s ease;
+    pointer-events: none;
+  }
+  .kpi-card:hover::before { transform: translateX(120%); }
+
+  /* glow orb breathing */
+  .kpi-card .glow { animation: glowPulse 4s ease-in-out infinite; }
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.06; transform: translate(30%, -30%) scale(1); }
+    50%       { opacity: 0.20; transform: translate(30%, -30%) scale(1.5); }
+  }
+
+  /* icon pop on load */
+  .kpi-icon { animation: iconPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  .kpi-card:nth-child(1) .kpi-icon { animation-delay: 120ms; }
+  .kpi-card:nth-child(2) .kpi-icon { animation-delay: 200ms; }
+  .kpi-card:nth-child(3) .kpi-icon { animation-delay: 280ms; }
+  .kpi-card:nth-child(4) .kpi-icon { animation-delay: 360ms; }
+  .kpi-card:nth-child(5) .kpi-icon { animation-delay: 440ms; }
+  @keyframes iconPop {
+    from { transform: scale(0.3); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  /* ---------- BRAND LOGO ---------- */
+  .brand-logo {
+    animation: logoPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .brand-logo:hover {
+    transform: rotate(-6deg) scale(1.1);
+    box-shadow: 0 0 20px #1877F240;
+  }
+  @keyframes logoPop {
+    from { transform: scale(0.4) rotate(-15deg); opacity: 0; }
+    to   { transform: scale(1)   rotate(0deg);   opacity: 1; }
+  }
+
+  /* ---------- PERIOD BADGE ---------- */
+  .period-badge { animation: badgePulse 5s ease-in-out infinite; }
+  @keyframes badgePulse {
+    0%, 100% { border-color: #2a3050; box-shadow: none; }
+    50%       { border-color: #1877F240; box-shadow: 0 0 16px #1877F218; }
+  }
+
+  /* ---------- CHART BOXES ENTRANCE ---------- */
+  .chart-box {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.55s ease forwards;
+  }
+  .charts-row .chart-box:nth-child(1) { animation-delay: 480ms; }
+  .charts-row .chart-box:nth-child(2) { animation-delay: 630ms; }
 </style>
 </head>
 
@@ -207,8 +298,7 @@
   <header class="header">
     <div class="brand">
       <div class="brand-row">
-        <img class="brand-logo" id="brandLogo" alt="Logo"
-             src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%23161c2e'/><text x='50%25' y='55%25' font-family='DM Sans' font-size='22' font-weight='800' fill='%231877F2' text-anchor='middle' dominant-baseline='middle'>Z</text></svg>" />
+        <img class="brand-logo" id="brandLogo" alt="Logo Zeus" src="IMG_0976.PNG" />
         <div class="brand-title" id="brandTitle">ZEUS</div>
       </div>
       <div class="brand-subtitle">Relatório de Facebook Ads</div>
@@ -278,7 +368,7 @@
 
   const grid = document.getElementById('kpiGrid');
   grid.innerHTML = kpis.map(k => {
-    const val = k.fmt === 'currency' ? fmtR(k.value) : fmt(k.value);
+    const initVal = k.fmt === 'currency' ? fmtR(0) : '0';
     const changeHtml = k.change !== undefined
       ? `<div class="kpi-change ${k.change >= 0 ? 'up' : 'down'}">
            ${k.change >= 0 ? '▲' : '▼'} ${Math.abs(k.change)}%
@@ -293,10 +383,34 @@
         </div>
         <div>
           <div class="kpi-label">${k.label}</div>
-          <div class="kpi-value">${val}</div>
+          <div class="kpi-value" data-target="${k.value}" data-type="${k.fmt}">${initVal}</div>
         </div>
       </article>`;
   }).join('');
+
+  // ---------- COUNTER ANIMATION ----------
+  function animateCount(el, target, isCurrency) {
+    const duration = 1400;
+    const start = performance.now();
+    const easeOut = t => 1 - Math.pow(1 - t, 3);
+    const tick = now => {
+      const p = Math.min((now - start) / duration, 1);
+      const v = target * easeOut(p);
+      el.textContent = isCurrency ? fmtR(v) : fmt(Math.round(v));
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  const countObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target.querySelector('.kpi-value[data-target]');
+      if (el) animateCount(el, parseFloat(el.dataset.target), el.dataset.type === 'currency');
+      countObs.unobserve(entry.target);
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.kpi-card').forEach(c => countObs.observe(c));
 
   // ---------- PERIOD / FOOTER ----------
   document.getElementById('periodBadge').textContent = '📅 ' + DATA.period;
@@ -345,6 +459,7 @@
     },
     options: {
       ...chartCommonOpts,
+      animation: { duration: 1500, easing: 'easeInOutQuart' },
       interaction: { mode: 'index', intersect: false },
       scales: {
         x: { ticks: { color: '#5a6480', font: { family: 'DM Sans' } }, grid: { color: '#1a2035' } },
@@ -376,6 +491,11 @@
     },
     options: {
       ...chartCommonOpts,
+      animation: {
+        duration: 1100,
+        easing: 'easeOutBack',
+        delay: ctx => ctx.dataIndex * 70,
+      },
       plugins: { ...chartCommonOpts.plugins, legend: { display: false } },
       scales: {
         x: { ticks: { color: '#5a6480', font: { family: 'DM Sans' } }, grid: { display: false } },
