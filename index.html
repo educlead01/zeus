@@ -59,8 +59,13 @@
   .brand-subtitle {
     font-size: 13px; color: #5a6480; padding-left: 2px;
   }
-  .period-badge {
+  .badges-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     align-self: stretch;
+  }
+  .period-badge {
     text-align: center;
     background: #161c2e;
     border: 1px solid #2a3050;
@@ -166,8 +171,8 @@
     }
     .brand-logo { width: 48px; height: 48px; }
     .brand-title { font-size: 26px; }
+    .badges-col { align-self: auto; }
     .period-badge {
-      align-self: auto;
       padding: 10px 18px;
       font-size: 14px;
       border-radius: 10px;
@@ -303,7 +308,10 @@
       </div>
       <div class="brand-subtitle">Relatório de Facebook Ads</div>
     </div>
-    <div class="period-badge" id="periodBadge">📅 Últimos 30 dias</div>
+    <div class="badges-col">
+      <div class="period-badge" id="periodBadge">📅 Últimos 30 dias</div>
+      <div class="period-badge">📅 25/04 – 25/05</div>
+    </div>
   </header>
 
   <!-- KPIs -->
@@ -331,12 +339,12 @@
     brandName: "Minha Marca",
     period: "Últimos 30 dias",
     accentColor: "#1877F2",
-    followers: 238,
-    profileVisits: 1829,
-    whatsappLeads: 139,
-    reach: 54323,
+    followers: 386,
+    profileVisits: 2992,
+    whatsappLeads: 479,
+    reach: 121141,
     cpm: 18.4,
-    investment: 532.13,
+    investment: 1780.00,
   };
 
   // ---------- ICONS ----------
@@ -439,18 +447,18 @@
   new Chart(lineCtx, {
     type: 'line',
     data: {
-      labels: ['01 Mar', '05 Mar', '10 Mar', '15 Mar', '20 Mar', '25 Mar', '31 Mar'],
+      labels: ['25 Abr', '29 Abr', '04 Mai', '09 Mai', '14 Mai', '19 Mai', '25 Mai'],
       datasets: [
         {
           label: 'Alcance diário',
-          data: [12400, 18700, 22100, 31500, 28900, 35200, 41800],
+          data: [27600, 41700, 49300, 70200, 64500, 78500, 93200],
           borderColor: DATA.accentColor, backgroundColor: grad,
           borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: DATA.accentColor,
           tension: 0.4, fill: true, yAxisID: 'y',
         },
         {
           label: 'Leads WhatsApp',
-          data: [18, 32, 44, 67, 58, 82, 97],
+          data: [62, 110, 152, 231, 200, 283, 335],
           borderColor: '#30d98a', backgroundColor: 'transparent',
           borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#30d98a',
           tension: 0.4, fill: false, yAxisID: 'y2',
@@ -484,7 +492,7 @@
       labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
       datasets: [{
         label: 'Novos seguidores',
-        data: [18, 14, 9, 21, 16, 12, 19],
+        data: [55, 48, 42, 72, 65, 58, 46],
         backgroundColor: DATA.accentColor + 'cc',
         borderRadius: 8, borderSkipped: false,
       }],
