@@ -310,7 +310,7 @@
     </div>
     <div class="badges-col">
       <div class="period-badge" id="periodBadge">📅 Últimos 30 dias</div>
-      <div class="period-badge">📅 25/04 – 25/05</div>
+      <div class="period-badge">📅 01/06 – 29/06</div>
     </div>
   </header>
 
@@ -337,14 +337,14 @@
   // ---------- DATA (edit these to customize the report) ----------
   const DATA = {
     brandName: "Minha Marca",
-    period: "Últimos 30 dias",
+    period: "01/06 – 29/06",
     accentColor: "#1877F2",
-    followers: 386,
-    profileVisits: 2992,
-    whatsappLeads: 479,
-    reach: 121141,
-    cpm: 18.4,
-    investment: 1780.00,
+    followers: 128,
+    profileVisits: 935,
+    whatsappLeads: 314,
+    reach: 49747,
+    cpm: 24.20,
+    investment: 1198.07,
   };
 
   // ---------- ICONS ----------
@@ -447,18 +447,18 @@
   new Chart(lineCtx, {
     type: 'line',
     data: {
-      labels: ['25 Abr', '29 Abr', '04 Mai', '09 Mai', '14 Mai', '19 Mai', '25 Mai'],
+      labels: ['01 Jun', '05 Jun', '09 Jun', '13 Jun', '17 Jun', '22 Jun', '29 Jun'],
       datasets: [
         {
           label: 'Alcance diário',
-          data: [27600, 41700, 49300, 70200, 64500, 78500, 93200],
+          data: [4800, 6200, 7100, 8300, 7900, 9200, 6247],
           borderColor: DATA.accentColor, backgroundColor: grad,
           borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: DATA.accentColor,
           tension: 0.4, fill: true, yAxisID: 'y',
         },
         {
           label: 'Leads WhatsApp',
-          data: [62, 110, 152, 231, 200, 283, 335],
+          data: [28, 52, 71, 98, 112, 142, 314],
           borderColor: '#30d98a', backgroundColor: 'transparent',
           borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#30d98a',
           tension: 0.4, fill: false, yAxisID: 'y2',
